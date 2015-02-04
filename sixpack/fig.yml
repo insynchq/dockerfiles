@@ -1,0 +1,28 @@
+redis:
+  image: redis:latest
+  command: redis-server --appendonly yes
+
+server:
+  build: .
+  links:
+    - redis:redis
+  ports:
+    - 5000:5000
+  environment:
+    SIXPACK_CONFIG_ENABLED: 1
+    SIXPACK_CONFIG_REDIS_HOST: redis
+    SIXPACK_CONFIG_SECRET:
+  command: gunicorn -b 0.0.0.0:5000 --access-logfile - -w 8 --worker-class=gevent sixpack.server:start
+
+web:
+  build: .
+  links:
+    - server:server
+    - redis:redis
+  ports:
+    - 5001:5001
+  environment:
+    SIXPACK_CONFIG_ENABLED: 1
+    SIXPACK_CONFIG_REDIS_HOST: redis
+    SIXPACK_CONFIG_SECRET:
+  command: gunicorn -b 0.0.0.0:5001 --access-logfile - -w 2 --worker-class=gevent sixpack.web:start
