@@ -1,0 +1,4 @@
+#!/bin/bash
+pyenv install 2.6.9
+pyenv rehash
+pyenv global 2.6.9
